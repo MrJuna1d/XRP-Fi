@@ -1,27 +1,23 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import HALO from 'vanta/dist/vanta.halo.min';
+import GLOBE from 'vanta/dist/vanta.globe.min';
 
-const VantaBackground = ({ children }) => {
+const VantaBackground = () => {
   const vantaRef = useRef(null);
   const vantaEffect = useRef(null);
 
   useEffect(() => {
     if (!vantaEffect.current) {
-      vantaEffect.current = HALO({
+      vantaEffect.current = GLOBE({
         el: vantaRef.current,
         THREE: THREE,
         mouseControls: true,
         touchControls: true,
-        backgroundColor: 0x181848, // deep navy
-        baseColor: 0x7f5fff,      // soft purple
-        color2: 0x00eaff,         // cyan
-        amplitudeFactor: 2.5,
-        size: 2.0,
-        speed: 0.7,
-        xOffset: 0.0,
-        yOffset: 0.0,
-        // No alpha in hex, so we'll use a semi-transparent overlay in the style below
+        backgroundColor: 0x222222, // Dark grey background
+        color: 0x98465f,           // Soft purple for globe elements
+        size: 1.0,                 // Size of the globe
+        showSphere: true,          // Whether to show the central sphere
+        showOutline: false,        // Whether to show the outline of the sphere
       });
     }
     return () => {
@@ -32,9 +28,18 @@ const VantaBackground = ({ children }) => {
   }, []);
 
   return (
-    <div ref={vantaRef} style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 0 }}>
-      <div style={{ position: 'absolute', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(24,24,72,0.7)', zIndex: 1 }} />
-      {children}
+    <div
+      ref={vantaRef}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        zIndex: 0,
+        pointerEvents: 'none', // allow interaction with content above
+      }}
+    >
     </div>
   );
 };

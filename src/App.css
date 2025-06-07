@@ -9,7 +9,6 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
   background: #0A0A0B;
   color: #FFFFFF;
-  overflow-x: hidden;
 }
 
 .app {
@@ -43,38 +42,12 @@ body {
   justify-content: center;
 }
 
-.line {
-  position: absolute;
-  width: 80px;
-  height: 3px;
-  background: linear-gradient(90deg, transparent 0%, #00D4FF 50%, transparent 100%);
-  box-shadow: 
-    0 0 10px rgba(0, 212, 255, 0.5),
-    0 0 20px rgba(0, 212, 255, 0.3),
-    0 0 30px rgba(0, 212, 255, 0.1);
-  border-radius: 2px;
-}
-
-.x-glow {
-  position: absolute;
-  width: 80px;
-  height: 80px;
-  background: radial-gradient(circle, rgba(0, 212, 255, 0.3) 0%, transparent 70%);
-  border-radius: 50%;
-  filter: blur(10px);
-}
-
-.x-container {
-  position: absolute;
-  width: 80px;
-  height: 80px;
-}
+/* Removed old .line, .x-glow, .x-container styles */
 
 /* Landing Page Styles */
 .landing-page {
   min-height: 100vh;
   position: relative;
-  overflow: hidden;
 }
 
 .landing-content {
@@ -103,6 +76,7 @@ body {
   line-height: 1.2;
   margin-bottom: 1rem;
   letter-spacing: -0.02em;
+  font-family: 'Oxanium', monospace;
 }
 
 .gradient-text {
@@ -151,7 +125,7 @@ body {
 }
 
 .feature-card {
-  background: rgba(255, 255, 255, 0.05);
+  background: #cccccc;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
@@ -176,11 +150,11 @@ body {
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
-  color: #FFFFFF;
+  color: #0A0A0B;
 }
 
 .feature-card p {
-  color: #B0B0B0;
+  color: #0A0A0B;
   line-height: 1.5;
 }
 
@@ -188,7 +162,6 @@ body {
 .dashboard, .portfolio-page {
   min-height: 100vh;
   position: relative;
-  overflow: hidden;
 }
 
 .dashboard-container {
@@ -214,6 +187,7 @@ body {
   font-size: clamp(2rem, 4vw, 3rem);
   font-weight: 700;
   line-height: 1.2;
+  font-family: 'Oxanium', monospace;
 }
 
 .header-actions {
@@ -230,9 +204,10 @@ body {
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 600;
   text-decoration: none;
+  font-family: 'Oxanium', monospace;
 }
 
 .portfolio-button:hover, .back-button:hover {
@@ -249,8 +224,9 @@ body {
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: 'Oxanium', monospace;
 }
 
 .disconnect-button:hover {
@@ -284,6 +260,7 @@ body {
   font-weight: 600;
   margin-bottom: 1.5rem;
   color: #FFFFFF;
+  font-family: 'Oxanium', monospace;
 }
 
 .portfolio-grid {
@@ -294,7 +271,7 @@ body {
 }
 
 .portfolio-card {
-  background: rgba(255, 255, 255, 0.05);
+  background: #cccccc;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
@@ -317,7 +294,7 @@ body {
 .card-header h3 {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #FFFFFF;
+  color: #0A0A0B;
 }
 
 .wallet-status {
@@ -329,10 +306,10 @@ body {
 .wallet-address {
   font-family: 'Monaco', 'Menlo', monospace;
   font-size: 0.9rem;
-  color: #B0B0B0;
+  color: #FFFFFF;
   margin-bottom: 1rem;
   padding: 0.5rem;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.4);
   border-radius: 6px;
 }
 
@@ -342,15 +319,10 @@ body {
   align-items: center;
 }
 
-.balance-label {
-  color: #B0B0B0;
-  font-size: 0.9rem;
-}
-
-.balance-amount {
-  font-size: 1.2rem;
-  font-weight: 600;
+.balance-value {
   color: #00D4FF;
+  font-weight: 600;
+  font-size: 1.1rem;
 }
 
 .stats-card {
@@ -366,14 +338,14 @@ body {
 }
 
 .stat-label {
-  color: #B0B0B0;
+  color: #0A0A0B;
   font-size: 0.9rem;
 }
 
 .stat-value {
   font-size: 1.2rem;
   font-weight: 600;
-  color: #FFFFFF;
+  color: #0A0A0B;
 }
 
 .actions-card h3 {
@@ -420,7 +392,7 @@ body {
 }
 
 .yield-card {
-  background: rgba(255, 255, 255, 0.05);
+  background: #cccccc;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
@@ -454,7 +426,7 @@ body {
 .protocol-name {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #FFFFFF;
+  color: #0A0A0B;
   margin-bottom: 0.25rem;
   display: flex;
   align-items: center;
@@ -472,7 +444,7 @@ body {
 
 .protocol-chain {
   font-size: 0.8rem;
-  color: #B0B0B0;
+  color: #0A0A0B;
 }
 
 .risk-badge {
@@ -496,18 +468,18 @@ body {
 
 .stat-label {
   font-size: 0.8rem;
-  color: #B0B0B0;
+  color: #0A0A0B;
   margin-bottom: 0.25rem;
 }
 
 .stat-value {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #FFFFFF;
+  color: #0A0A0B;
 }
 
 .apy-value {
-  color: #00D4FF;
+  color: #10B981;
   font-size: 1.3rem;
 }
 
@@ -605,7 +577,7 @@ body {
 .empty-state {
   text-align: center;
   padding: 4rem 2rem;
-  background: rgba(255, 255, 255, 0.05);
+  background: #cccccc;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -619,11 +591,11 @@ body {
 .empty-state h3 {
   font-size: 1.5rem;
   margin-bottom: 0.5rem;
-  color: #FFFFFF;
+  color: #0A0A0B;
 }
 
 .empty-state p {
-  color: #B0B0B0;
+  color: #0A0A0B;
   margin-bottom: 2rem;
 }
 
@@ -635,7 +607,7 @@ body {
 }
 
 .staked-asset-card {
-  background: rgba(255, 255, 255, 0.05);
+  background: #cccccc;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
@@ -668,7 +640,7 @@ body {
 .asset-protocol h3 {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #FFFFFF;
+  color: #0A0A0B;
   margin-bottom: 0.25rem;
 }
 
@@ -707,13 +679,13 @@ body {
 
 .detail-label {
   font-size: 0.9rem;
-  color: #B0B0B0;
+  color: #0A0A0B;
 }
 
 .detail-value {
   font-size: 0.9rem;
   font-weight: 500;
-  color: #FFFFFF;
+  color: #0A0A0B;
 }
 
 .withdraw-button {
@@ -818,7 +790,7 @@ body {
 }
 
 .balance-label {
-  color: #B0B0B0;
+  color: #FFFFFF;
   font-size: 0.9rem;
 }
 
@@ -1115,21 +1087,6 @@ body {
     height: 80px;
   }
   
-  .line {
-    width: 60px;
-    height: 2px;
-  }
-  
-  .x-glow {
-    width: 60px;
-    height: 60px;
-  }
-  
-  .x-container {
-    width: 60px;
-    height: 60px;
-  }
-
   .dashboard-container {
     padding: 1rem;
   }
@@ -1219,4 +1176,16 @@ body {
 .portfolio-card:hover::before,
 .yield-card:hover::before {
   opacity: 1;
+}
+
+html, body, #root {
+  height: 100%;
+  min-height: 100%;
+  overflow-y: auto;
+}
+
+.app, .dashboard, .portfolio-page, .dashboard-container {
+  min-height: 100vh;
+  z-index: 1;
+  position: relative;
 }

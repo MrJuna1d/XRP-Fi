@@ -6,7 +6,7 @@ import LandingPage from './components/LandingPage';
 import Dashboard from './components/Dashboard';
 import Portfolio from './pages/Portfolio';
 import { WalletProvider } from './context/WalletContext';
-import VantaBackground from './components/VantaBackground.jsx';
+import VantaBackground from './components/VantaBackground';
 import './App.css';
 
 function App() {
@@ -18,24 +18,18 @@ function App() {
 
   return (
     <WalletProvider>
-      <Router>
-        <VantaBackground>
-          <div className="app">
-            <AnimatePresence mode="wait">
-              {isLoading ? (
-                <LoadingScreen key="loading" onComplete={handleLoadingComplete} />
-              ) : (
-                <Routes>
-                  <Route path="/" element={<LandingPage />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/portfolio" element={<Portfolio />} />
-                  <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-              )}
-            </AnimatePresence>
-          </div>
-        </VantaBackground>
-      </Router>
+      {isLoading && <LoadingScreen onComplete={handleLoadingComplete} />}
+      <VantaBackground />
+      <div className="app">
+        <Router>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/portfolio" element={<Portfolio />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Router>
+      </div>
     </WalletProvider>
   );
 }
