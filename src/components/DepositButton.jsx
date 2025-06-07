@@ -1,31 +1,37 @@
 import { useState, useEffect } from "react";
 import { useWallet } from "../context/WalletContext";
-import { CONTRACT_ABI } from "../constants/contract";
+import { XRP_CONTRACT_ABI } from "../constants/XRPcontract";
 import { ethers } from "ethers";
 
-const CONTRACT_ADDRESS = "0xaFac3C0Fa22E12454c4053D0419dC900724DC461";
+const CONTRACT_ADDRESS = "0x61389b858618dc82e961Eadfd5B33C83B9669E04";
 
 const DepositButton = () => {
   const { account } = useWallet();
-  const [xrpBalance, setXrpBalance] = useState("0.00");
+  const [userDeposit, setUserDeposit] = useState("0.00");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const getBalance = async () => {
+  // ✅ Fetch user's deposited balance from contract
+  const fetchDepositBalance = async () => {
     if (!account || typeof window.ethereum === "undefined") return;
 
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
-      const balanceBigInt = await provider.getBalance(account);
-      const balanceInEth = ethers.formatEther(balanceBigInt);
-      setXrpBalance(parseFloat(balanceInEth).toFixed(4)); // treat it as XRP
+      const contract = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        XRP_CONTRACT_ABI,
+        provider
+      );
+      const depositBigInt = await contract.getDepositBalance(account);
+      const depositFormatted = ethers.formatEther(depositBigInt);
+      setUserDeposit(parseFloat(depositFormatted).toFixed(4));
     } catch (error) {
-      console.error("Failed to fetch balance:", error);
+      console.error("Failed to fetch deposited balance:", error);
     }
   };
 
   useEffect(() => {
-    getBalance();
+    fetchDepositBalance();
   }, [account]);
 
   const handleDeposit = async () => {
@@ -51,7 +57,7 @@ const DepositButton = () => {
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(
         CONTRACT_ADDRESS,
-        CONTRACT_ABI,
+        XRP_CONTRACT_ABI,
         signer
       );
 
@@ -61,7 +67,7 @@ const DepositButton = () => {
 
       await tx.wait();
       setMessage(`✅ Successfully deposited ${depositAmount} XRP.`);
-      getBalance(); // update balance after deposit
+      fetchDepositBalance(); // refresh after deposit
     } catch (error) {
       console.error("Deposit failed:", error);
       setMessage("❌ Deposit failed. Check the console for details.");
@@ -73,7 +79,7 @@ const DepositButton = () => {
   return (
     <div className="text-white space-y-3">
       <div>
-        <strong>Your XRP Balance:</strong> {xrpBalance} XRP
+        <strong>Deposited XRP in Contract:</strong> {userDeposit} XRP
       </div>
 
       <button

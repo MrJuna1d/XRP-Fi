@@ -1,48 +1,11 @@
-export const CONTRACT_ADDRESS = "0xaFac3C0Fa22E12454c4053D0419dC900724DC461";
-export const CONTRACT_ABI = [
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_amount",
-        type: "uint256",
-      },
-    ],
-    name: "bridgeXrpToEth",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "deposit",
-    outputs: [],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_amount",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "_payerAddress",
-        type: "address",
-      },
-    ],
-    name: "getBackXrpFromEth",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
+export const XRP_CONTRACT_ADDRESS =
+  "0x61389b858618dc82e961Eadfd5B33C83B9669E04";
+export const XRP_CONTRACT_ABI = [
   {
     inputs: [
       {
         internalType: "address payable",
-        name: "_crosschainWalletAddress",
+        name: "_crosschainWallet",
         type: "address",
       },
     ],
@@ -51,28 +14,83 @@ export const CONTRACT_ABI = [
   },
   {
     inputs: [],
-    name: "xrpfi__FailedToSendXrp",
+    name: "AlreadyProcessed",
     type: "error",
   },
   {
     inputs: [],
-    name: "xrpfi__HaveToBeMoreThanZero",
+    name: "InsufficientBalance",
     type: "error",
   },
   {
     inputs: [],
-    name: "xrpfi__NotEnoughDepositBalance",
+    name: "InvalidAmount",
     type: "error",
   },
   {
     inputs: [],
-    name: "xrpfi__OnlyCrossChainWallet",
+    name: "InvalidBridge",
     type: "error",
   },
   {
     inputs: [],
-    name: "xrpfi__TransferFailed",
+    name: "TransferFailed",
     type: "error",
+  },
+  {
+    inputs: [],
+    name: "Unauthorized",
+    type: "error",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "bridgeId",
+        type: "uint256",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "BridgeInitiated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "bridgeId",
+        type: "uint256",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "BridgeSettled",
+    type: "event",
   },
   {
     anonymous: false,
@@ -90,7 +108,7 @@ export const CONTRACT_ABI = [
         type: "uint256",
       },
     ],
-    name: "BridgedBackFromEth",
+    name: "Deposit",
     type: "event",
   },
   {
@@ -109,78 +127,12 @@ export const CONTRACT_ABI = [
         type: "uint256",
       },
     ],
-    name: "BridgedToEth",
+    name: "Withdrawal",
     type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "user",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    name: "Deposited",
-    type: "event",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address payable",
-        name: "_user",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "_amount",
-        type: "uint256",
-      },
-    ],
-    name: "transferXrpBackToUser",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "from",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "to",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    name: "XrpTransferred",
-    type: "event",
-  },
-  {
-    stateMutability: "payable",
-    type: "receive",
   },
   {
     inputs: [],
-    name: "CROSSCHAIN_WALLET_ADDRESS",
+    name: "CROSSCHAIN_WALLET",
     outputs: [
       {
         internalType: "address payable",
@@ -194,8 +146,44 @@ export const CONTRACT_ABI = [
   {
     inputs: [
       {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    name: "bridgeRequests",
+    outputs: [
+      {
         internalType: "address",
-        name: "_user",
+        name: "user",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+      {
+        internalType: "bool",
+        name: "settled",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "deposit",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "user",
         type: "address",
       },
     ],
@@ -211,8 +199,27 @@ export const CONTRACT_ABI = [
     type: "function",
   },
   {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "initiateBridge",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "bridgeId",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
     inputs: [],
-    name: "getTotalCrossChainDebt",
+    name: "nextBridgeId",
     outputs: [
       {
         internalType: "uint256",
@@ -226,12 +233,25 @@ export const CONTRACT_ABI = [
   {
     inputs: [
       {
+        internalType: "uint256",
+        name: "bridgeId",
+        type: "uint256",
+      },
+    ],
+    name: "settleBridge",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         internalType: "address",
         name: "",
         type: "address",
       },
     ],
-    name: "s_addressToAmountDeposited",
+    name: "userDeposits",
     outputs: [
       {
         internalType: "uint256",
@@ -243,16 +263,20 @@ export const CONTRACT_ABI = [
     type: "function",
   },
   {
-    inputs: [],
-    name: "totalCrossChainDebt",
-    outputs: [
+    inputs: [
       {
         internalType: "uint256",
-        name: "",
+        name: "amount",
         type: "uint256",
       },
     ],
-    stateMutability: "view",
+    name: "withdraw",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
+  },
+  {
+    stateMutability: "payable",
+    type: "receive",
   },
 ];

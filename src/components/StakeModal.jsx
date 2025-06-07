@@ -1,46 +1,82 @@
-import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
-import { useWallet } from '../context/WalletContext';
+// ✅ FINAL VERSION OF STAKE MODAL — ensures contract sends real value from deposit balance to bridge wallet
+
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
+import { useWallet } from "../context/WalletContext";
+import { ethers } from "ethers";
+import {
+  XRP_CONTRACT_ADDRESS,
+  XRP_CONTRACT_ABI,
+} from "../constants/XRPcontract";
 
 const StakeModal = ({ opportunity, onClose }) => {
-  const { balance, stakeAsset } = useWallet();
-  const [stakeAmount, setStakeAmount] = useState('');
+  const { account } = useWallet();
+  const [depositedBalance, setDepositedBalance] = useState("0.00");
+  const [stakeAmount, setStakeAmount] = useState("");
   const [isStaking, setIsStaking] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
+  const fetchDepositBalance = async () => {
+    if (!account || !window.ethereum) return;
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const contract = new ethers.Contract(
+        XRP_CONTRACT_ADDRESS,
+        XRP_CONTRACT_ABI,
+        provider
+      );
+      const balanceBigInt = await contract.getDepositBalance(account);
+      const formatted = ethers.formatEther(balanceBigInt);
+      setDepositedBalance(parseFloat(formatted).toFixed(4));
+    } catch (err) {
+      console.error("Error fetching deposit balance:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchDepositBalance();
+  }, [account]);
+
   const handleStakeConfirm = async () => {
-    if (!stakeAmount || parseFloat(stakeAmount) <= 0) {
-      alert('Please enter a valid amount');
-      return;
-    }
-
-    const numericBalance = parseFloat(balance.replace(',', ''));
     const numericAmount = parseFloat(stakeAmount);
+    const numericBalance = parseFloat(depositedBalance);
 
-    if (numericAmount > numericBalance) {
-      alert('Insufficient balance');
-      return;
-    }
+    if (!numericAmount || numericAmount <= 0) return alert("Invalid amount");
+    if (numericAmount > numericBalance)
+      return alert("Insufficient deposited balance");
 
-    setIsStaking(true);
+    try {
+      setIsStaking(true);
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(
+        XRP_CONTRACT_ADDRESS,
+        XRP_CONTRACT_ABI,
+        signer
+      );
 
-    // Simulate staking process
-    setTimeout(() => {
-      stakeAsset(opportunity.protocol, numericAmount, opportunity.apy);
-      setIsStaking(false);
+      const parsedAmount = ethers.parseEther(numericAmount.toString());
+
+      const tx = await contract.initiateBridge(parsedAmount);
+      await tx.wait();
+
+      await fetchDepositBalance();
+
       setShowSuccess(true);
-
-      // Show success animation for 2 seconds then close modal
       setTimeout(() => {
         setShowSuccess(false);
         onClose();
       }, 2000);
-    }, 1500);
+    } catch (err) {
+      console.error("Bridge initiation failed:", err);
+      alert("Bridge transaction failed. Check console for details.");
+    } finally {
+      setIsStaking(false);
+    }
   };
 
   const handleMaxClick = () => {
-    const numericBalance = parseFloat(balance.replace(',', ''));
-    setStakeAmount(numericBalance.toString());
+    setStakeAmount(depositedBalance.toString());
   };
 
   return (
@@ -62,27 +98,30 @@ const StakeModal = ({ opportunity, onClose }) => {
         >
           {!showSuccess ? (
             <>
-              {/* Modal Header */}
               <div className="modal-header">
                 <div className="modal-protocol-info">
                   <div className="modal-protocol-icon">{opportunity.icon}</div>
                   <div>
-                    <h3 className="modal-protocol-name">Stake in {opportunity.protocol}</h3>
-                    <div className="modal-protocol-details">{opportunity.chain} • {opportunity.apy}% APY</div>
+                    <h3 className="modal-protocol-name">
+                      Stake in {opportunity.protocol}
+                    </h3>
+                    <div className="modal-protocol-details">
+                      {opportunity.chain} • {opportunity.apy}% APY
+                    </div>
                   </div>
                 </div>
-                <button className="modal-close-btn" onClick={onClose}>✕</button>
+                <button className="modal-close-btn" onClick={onClose}>
+                  ✕
+                </button>
               </div>
 
-              {/* Balance Display */}
               <div className="modal-balance">
                 <div className="balance-info">
-                  <span className="balance-label">Available Balance</span>
-                  <span className="balance-value">{balance} XRP</span>
+                  <span className="balance-label">Deposited in Contract</span>
+                  <span className="balance-value">{depositedBalance} XRP</span>
                 </div>
               </div>
 
-              {/* Stake Amount Input */}
               <div className="stake-input-section">
                 <label className="input-label">Amount to Stake</label>
                 <div className="stake-input-container">
@@ -95,7 +134,7 @@ const StakeModal = ({ opportunity, onClose }) => {
                     disabled={isStaking}
                   />
                   <div className="input-actions">
-                    <button 
+                    <button
                       className="max-button"
                       onClick={handleMaxClick}
                       disabled={isStaking}
@@ -107,7 +146,6 @@ const StakeModal = ({ opportunity, onClose }) => {
                 </div>
               </div>
 
-              {/* Stake Summary */}
               {stakeAmount && (
                 <motion.div
                   className="stake-summary"
@@ -121,13 +159,17 @@ const StakeModal = ({ opportunity, onClose }) => {
                   <div className="summary-row">
                     <span>Expected yearly yield</span>
                     <span className="summary-value gradient-text">
-                      {(parseFloat(stakeAmount) * parseFloat(opportunity.apy) / 100).toFixed(2)} XRP
+                      {(
+                        (parseFloat(stakeAmount) *
+                          parseFloat(opportunity.apy)) /
+                        100
+                      ).toFixed(2)}{" "}
+                      XRP
                     </span>
                   </div>
                 </motion.div>
               )}
 
-              {/* Confirm Button */}
               <motion.button
                 className="confirm-stake-button"
                 onClick={handleStakeConfirm}
@@ -137,16 +179,14 @@ const StakeModal = ({ opportunity, onClose }) => {
               >
                 {isStaking ? (
                   <div className="loading-spinner">
-                    <div className="spinner"></div>
-                    Staking...
+                    <div className="spinner"></div>Staking...
                   </div>
                 ) : (
-                  'Confirm Stake'
+                  "Confirm Stake"
                 )}
               </motion.button>
             </>
           ) : (
-            /* Success Animation */
             <motion.div
               className="success-animation"
               initial={{ scale: 0.5, opacity: 0 }}
@@ -157,7 +197,7 @@ const StakeModal = ({ opportunity, onClose }) => {
                 className="success-checkmark"
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ delay: 0.2, type: "spring", damping: 15, stiffness: 300 }}
+                transition={{ delay: 0.2 }}
               >
                 <motion.div
                   className="checkmark-circle"
@@ -175,7 +215,6 @@ const StakeModal = ({ opportunity, onClose }) => {
                   </motion.div>
                 </motion.div>
               </motion.div>
-              
               <motion.div
                 className="success-text"
                 initial={{ y: 20, opacity: 0 }}
@@ -183,9 +222,10 @@ const StakeModal = ({ opportunity, onClose }) => {
                 transition={{ delay: 0.5, duration: 0.4 }}
               >
                 <h3>Staked Successfully!</h3>
-                <p>{stakeAmount} XRP staked in {opportunity.protocol}</p>
+                <p>
+                  {stakeAmount} XRP staked in {opportunity.protocol}
+                </p>
               </motion.div>
-
               <motion.div
                 className="floating-xrp"
                 initial={{ y: 0, opacity: 1 }}
