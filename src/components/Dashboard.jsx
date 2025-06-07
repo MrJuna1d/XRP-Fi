@@ -1,9 +1,10 @@
-import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-import { useWallet } from '../context/WalletContext';
-import { useEffect, useState } from 'react';
-import YieldCard from './YieldCard';
-import StakeModal from './StakeModal';
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { useWallet } from "../context/WalletContext";
+import { useEffect, useState } from "react";
+import YieldCard from "./YieldCard";
+import StakeModal from "./StakeModal";
+import DepositButton from "../components/DepositButton";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -15,88 +16,90 @@ const Dashboard = () => {
   const yieldOpportunities = [
     {
       id: 1,
-      protocol: 'RealX',
-      chain: 'XRP Ledger',
-      apy: '8.5',
-      tvl: '$2.1B',
-      risk: 'Low',
-      icon: '🏦',
-      isFunctional: true // This one actually works
+      protocol: "RealX",
+      chain: "XRP Ledger",
+      apy: "8.5",
+      tvl: "$2.1B",
+      risk: "Low",
+      icon: "🏦",
+      isFunctional: true, // This one actually works
     },
     {
       id: 2,
-      protocol: 'Aave',
-      chain: 'Polygon',
-      apy: '12.3',
-      tvl: '$1.8B',
-      risk: 'Medium',
-      icon: '👻',
-      isFunctional: false // Mock only
+      protocol: "Aave",
+      chain: "Polygon",
+      apy: "12.3",
+      tvl: "$1.8B",
+      risk: "Medium",
+      icon: "👻",
+      isFunctional: false, // Mock only
     },
     {
       id: 3,
-      protocol: 'Curve',
-      chain: 'Arbitrum',
-      apy: '15.7',
-      tvl: '$950M',
-      risk: 'Medium',
-      icon: '🌊',
-      isFunctional: false // Mock only
+      protocol: "Curve",
+      chain: "Arbitrum",
+      apy: "15.7",
+      tvl: "$950M",
+      risk: "Medium",
+      icon: "🌊",
+      isFunctional: false, // Mock only
     },
     {
       id: 4,
-      protocol: 'Yearn',
-      chain: 'Optimism',
-      apy: '9.2',
-      tvl: '$1.2B',
-      risk: 'Low',
-      icon: '🧙‍♂️',
-      isFunctional: false // Mock only
+      protocol: "Yearn",
+      chain: "Optimism",
+      apy: "9.2",
+      tvl: "$1.2B",
+      risk: "Low",
+      icon: "🧙‍♂️",
+      isFunctional: false, // Mock only
     },
     {
       id: 5,
-      protocol: 'Convex',
-      chain: 'Ethereum',
-      apy: '18.4',
-      tvl: '$780M',
-      risk: 'High',
-      icon: '🔺',
-      isFunctional: false // Mock only
+      protocol: "Convex",
+      chain: "Ethereum",
+      apy: "18.4",
+      tvl: "$780M",
+      risk: "High",
+      icon: "🔺",
+      isFunctional: false, // Mock only
     },
     {
       id: 6,
-      protocol: 'Balancer',
-      chain: 'Polygon',
-      apy: '11.8',
-      tvl: '$650M',
-      risk: 'Medium',
-      icon: '⚖️',
-      isFunctional: false // Mock only
-    }
+      protocol: "Balancer",
+      chain: "Polygon",
+      apy: "11.8",
+      tvl: "$650M",
+      risk: "Medium",
+      icon: "⚖️",
+      isFunctional: false, // Mock only
+    },
   ];
 
   useEffect(() => {
     if (!account) {
-      navigate('/');
+      navigate("/");
     }
   }, [account, navigate]);
 
   const handleDisconnectWallet = () => {
     disconnectWallet();
     setShowDisconnectToast(true);
-    
+
     // Hide toast after 3 seconds
     setTimeout(() => {
       setShowDisconnectToast(false);
     }, 3000);
-    
+
     // Redirect to landing page
-    navigate('/');
+    navigate("/");
   };
 
   const handleStakeClick = (opportunity) => {
     if (!opportunity.isFunctional) {
-      alert(`${opportunity.protocol} is currently in demo mode. Only RealX is fully functional for staking.`);
+      alert(
+        `${opportunity.protocol} is currently in demo mode. Only RealX is fully functional for staking.`
+      );
       return;
     }
     setSelectedOpportunity(opportunity);
@@ -131,13 +134,21 @@ const Dashboard = () => {
           <div className="header-actions">
             <motion.button
               className="portfolio-button"
-              onClick={() => navigate('/portfolio')}
+              onClick={() => navigate("/portfolio")}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               📊 Portfolio
             </motion.button>
-            <button 
+            <motion.button
+              className="portfolio-button"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <DepositButton />
+            </motion.button>
+
+            <button
               className="disconnect-button"
               onClick={handleDisconnectWallet}
             >
