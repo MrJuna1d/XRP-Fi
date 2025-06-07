@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import LoadingScreen from './components/LoadingScreen';
@@ -18,7 +18,9 @@ function App() {
 
   return (
     <WalletProvider>
-      {isLoading && <LoadingScreen onComplete={handleLoadingComplete} />}
+      <AnimatePresence mode="wait">
+        {isLoading && <LoadingScreen onComplete={handleLoadingComplete} />}
+      </AnimatePresence>
       <VantaBackground />
       <div className="app">
         <Router>
