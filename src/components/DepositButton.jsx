@@ -7,25 +7,27 @@ const CONTRACT_ADDRESS = "0xaFac3C0Fa22E12454c4053D0419dC900724DC461";
 
 const DepositButton = () => {
   const { account } = useWallet();
-  const [xrpBalance, setXrpBalance] = useState("0.00");
+  const [userDeposit, setUserDeposit] = useState("0.00");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const getBalance = async () => {
+  // ✅ Fetch user's deposited balance from contract
+  const fetchDepositBalance = async () => {
     if (!account || typeof window.ethereum === "undefined") return;
 
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
-      const balanceBigInt = await provider.getBalance(account);
-      const balanceInEth = ethers.formatEther(balanceBigInt);
-      setXrpBalance(parseFloat(balanceInEth).toFixed(4)); // treat it as XRP
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
+      const depositBigInt = await contract.getDepositBalance(account);
+      const depositFormatted = ethers.formatEther(depositBigInt);
+      setUserDeposit(parseFloat(depositFormatted).toFixed(4));
     } catch (error) {
-      console.error("Failed to fetch balance:", error);
+      console.error("Failed to fetch deposited balance:", error);
     }
   };
 
   useEffect(() => {
-    getBalance();
+    fetchDepositBalance();
   }, [account]);
 
   const handleDeposit = async () => {
@@ -35,9 +37,7 @@ const DepositButton = () => {
     }
 
     try {
-      const depositAmount = prompt(
-        "Enter amount of XRP to deposit (e.g., 0.01):"
-      );
+      const depositAmount = prompt("Enter amount of XRP to deposit (e.g., 0.01):");
 
       if (!depositAmount || isNaN(depositAmount)) {
         setMessage("❌ Invalid amount entered.");
@@ -49,11 +49,7 @@ const DepositButton = () => {
 
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-      const contract = new ethers.Contract(
-        CONTRACT_ADDRESS,
-        CONTRACT_ABI,
-        signer
-      );
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
 
       const tx = await contract.deposit({
         value: ethers.parseEther(depositAmount),
@@ -61,7 +57,7 @@ const DepositButton = () => {
 
       await tx.wait();
       setMessage(`✅ Successfully deposited ${depositAmount} XRP.`);
-      getBalance(); // update balance after deposit
+      fetchDepositBalance(); // refresh after deposit
     } catch (error) {
       console.error("Deposit failed:", error);
       setMessage("❌ Deposit failed. Check the console for details.");
@@ -73,12 +69,12 @@ const DepositButton = () => {
   return (
     <div className="text-white space-y-3">
       <div>
-        <strong>Your XRP Balance:</strong> {xrpBalance} XRP
+        <strong>Deposited XRP in Contract:</strong> {userDeposit} XRP
       </div>
 
       <button
         onClick={handleDeposit}
-        className="px-8 py-3 bg-gradient-to-r from-[#00D4FF] to-[#0099CC] text-white font-bold text-lg rounded-xl shadow-lg hover:scale-105 transition duration-300 ease-in-out disabled:opacity-50"
+        className="px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded hover:scale-105 transition disabled:opacity-50"
         disabled={loading}
       >
         {loading ? "Processing..." : "Deposit XRP"}
