@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { ethers } from "ethers";
 import { XRP_CONTRACT_ADDRESS, XRP_CONTRACT_ABI } from "../constants/XRPcontract";
 
@@ -26,7 +26,7 @@ export const WalletProvider = ({ children }) => {
     stakedAssets: [],
   });
 
-  const fetchDepositBalance = async () => {
+  const fetchDepositBalance = useCallback(async () => {
     if (!account || typeof window.ethereum === "undefined") return;
 
     try {
@@ -44,7 +44,50 @@ export const WalletProvider = ({ children }) => {
       console.error("Failed to fetch deposit balance:", error);
       return null;
     }
-  };
+  }, [account]);
+
+  // Set up polling for deposit balance updates
+  useEffect(() => {
+    let intervalId;
+
+    if (account) {
+      // Initial fetch
+      fetchDepositBalance();
+
+      // Set up polling every 5 seconds
+      intervalId = setInterval(fetchDepositBalance, 5000);
+    }
+
+    // Cleanup interval on unmount or when account changes
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [account, fetchDepositBalance]);
+
+  // Set up event listener for new blocks
+  useEffect(() => {
+    let provider;
+
+    const setupBlockListener = async () => {
+      if (!account || typeof window.ethereum === "undefined") return;
+
+      provider = new ethers.BrowserProvider(window.ethereum);
+      provider.on("block", () => {
+        fetchDepositBalance();
+      });
+    };
+
+    setupBlockListener();
+
+    // Cleanup listener on unmount or when account changes
+    return () => {
+      if (provider) {
+        provider.removeAllListeners("block");
+      }
+    };
+  }, [account, fetchDepositBalance]);
 
   const connectWallet = async () => {
     if (typeof window.ethereum === "undefined") {

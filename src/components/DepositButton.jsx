@@ -4,13 +4,16 @@ import { XRP_CONTRACT_ABI, XRP_CONTRACT_ADDRESS } from "../constants/XRPcontract
 import { ethers } from "ethers";
 
 const DepositButton = () => {
-  const { account, depositBalance, fetchDepositBalance } = useWallet();
+  const { account, fetchDepositBalance } = useWallet();
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [txHash, setTxHash] = useState("");
+  const [showMessage, setShowMessage] = useState(false);
 
   const handleDeposit = async () => {
     if (!window.ethereum || !account) {
       setMessage("MetaMask not detected or wallet not connected.");
+      setShowMessage(true);
       return;
     }
 
@@ -19,11 +22,13 @@ const DepositButton = () => {
       
       if (!depositAmount || isNaN(depositAmount) || parseFloat(depositAmount) <= 0) {
         setMessage("❌ Invalid amount entered.");
+        setShowMessage(true);
         return;
       }
 
       setLoading(true);
       setMessage("Waiting for MetaMask confirmation...");
+      setShowMessage(true);
 
       // Get the signer and create contract instance
       const provider = new ethers.BrowserProvider(window.ethereum);
@@ -45,9 +50,11 @@ const DepositButton = () => {
       setMessage("Transaction submitted. Waiting for confirmation...");
       
       // Wait for transaction confirmation
-      await tx.wait();
+      const receipt = await tx.wait();
       
-      setMessage(`✅ Successfully deposited ${depositAmount} XRP.`);
+      setMessage(`✅ Successfully deposited ${depositAmount} XRP`);
+      setTxHash(receipt.hash);
+      setShowMessage(true);
       
       // Refresh the deposit balance
       await fetchDepositBalance();
@@ -60,28 +67,46 @@ const DepositButton = () => {
       } else {
         setMessage("❌ Deposit failed. Check console for details.");
       }
+      setShowMessage(true);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="text-white space-y-3">
-      <div>
-        <strong>Deposited XRP in Contract:</strong> {depositBalance} XRP
-      </div>
-
+    <div className="text-white">
       <button
         onClick={handleDeposit}
-        className="px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded hover:scale-105 transition disabled:opacity-50"
+        className="deposit-button"
         disabled={loading}
       >
         {loading ? "Processing..." : "Deposit XRP"}
       </button>
 
-      {message && (
-        <div className={`mt-2 text-sm italic ${message.includes('✅') ? 'text-green-400' : 'text-red-400'}`}>
-          {message}
+      {showMessage && (
+        <div className={`message-container ${message.includes('✅') ? 'success' : 'error'}`}>
+          <div className="message-content">
+            {message}
+            {txHash && (
+              <div className="tx-hash">
+                Transaction Hash: 
+                <a 
+                  href={`https://etherscan.io/tx/${txHash}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="hash-link"
+                >
+                  {txHash.slice(0, 6)}...{txHash.slice(-4)}
+                </a>
+              </div>
+            )}
+          </div>
+          <button 
+            className="close-button"
+            onClick={() => setShowMessage(false)}
+          >
+            ✕
+          </button>
         </div>
       )}
     </div>

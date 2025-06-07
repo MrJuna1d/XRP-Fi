@@ -11,68 +11,59 @@ const Dashboard = () => {
   const { account, disconnectWallet } = useWallet();
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
   const [showDisconnectToast, setShowDisconnectToast] = useState(false);
+  const [depositedAmount, setDepositedAmount] = useState("0.0760"); // Mock deposited amount
 
-  // Mock yield opportunities data - RealX is the only functional one
+  // Mock yield opportunities data
   const yieldOpportunities = [
     {
       id: 1,
-      protocol: "RealX",
-      chain: "XRP Ledger",
+      protocol: "Aave",
+      chain: "Ethereum",
       apy: "8.5",
       tvl: "$2.1B",
-      risk: "Low",
-      icon: "🏦",
-      isFunctional: true, // This one actually works
+      risk: "LOW",
+      icon: "👻",
+      isFunctional: true,
     },
     {
       id: 2,
-      protocol: "Aave",
+      protocol: "Curve",
       chain: "Polygon",
       apy: "12.3",
       tvl: "$1.8B",
-      risk: "Medium",
-      icon: "👻",
-      isFunctional: false, // Mock only
+      risk: "MEDIUM",
+      icon: "🌊",
+      isFunctional: false,
     },
     {
       id: 3,
-      protocol: "Curve",
-      chain: "Arbitrum",
+      protocol: "Yearn",
+      chain: "Optimism",
       apy: "15.7",
       tvl: "$950M",
-      risk: "Medium",
-      icon: "🌊",
-      isFunctional: false, // Mock only
+      risk: "MEDIUM",
+      icon: "🧙‍♂️",
+      isFunctional: false,
     },
     {
       id: 4,
-      protocol: "Yearn",
-      chain: "Optimism",
+      protocol: "Convex",
+      chain: "Ethereum",
       apy: "9.2",
       tvl: "$1.2B",
-      risk: "Low",
-      icon: "🧙‍♂️",
-      isFunctional: false, // Mock only
+      risk: "LOW",
+      icon: "🔺",
+      isFunctional: false,
     },
     {
       id: 5,
-      protocol: "Convex",
-      chain: "Ethereum",
-      apy: "18.4",
-      tvl: "$780M",
-      risk: "High",
-      icon: "🔺",
-      isFunctional: false, // Mock only
-    },
-    {
-      id: 6,
       protocol: "Balancer",
       chain: "Polygon",
       apy: "11.8",
       tvl: "$650M",
-      risk: "Medium",
+      risk: "MEDIUM",
       icon: "⚖️",
-      isFunctional: false, // Mock only
+      isFunctional: false,
     },
   ];
 
@@ -85,33 +76,21 @@ const Dashboard = () => {
   const handleDisconnectWallet = () => {
     disconnectWallet();
     setShowDisconnectToast(true);
-
-    // Hide toast after 3 seconds
-    setTimeout(() => {
-      setShowDisconnectToast(false);
-    }, 3000);
-
-    // Redirect to landing page
+    setTimeout(() => setShowDisconnectToast(false), 3000);
     navigate("/");
   };
 
   const handleStakeClick = (opportunity) => {
     if (!opportunity.isFunctional) {
       alert(
-        `${opportunity.protocol} is currently in demo mode. Only RealX is fully functional for staking.`
+        `${opportunity.protocol} is currently in demo mode. Only Aave is fully functional for staking.`
       );
       return;
     }
     setSelectedOpportunity(opportunity);
   };
 
-  const handleCloseModal = () => {
-    setSelectedOpportunity(null);
-  };
-
-  if (!account) {
-    return null;
-  }
+  if (!account) return null;
 
   return (
     <motion.div
@@ -128,46 +107,30 @@ const Dashboard = () => {
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="dashboard-title">
-            <motion.span
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-            >
-              XRP DeFi
-            </motion.span>{' '}
-            <motion.span
-              className="gradient-text"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
-            >
-              Dashboard
-            </motion.span>
-          </h1>
+          <div className="header-left">
+            <h1 className="dashboard-title">XRP.Fi</h1>
+          </div>
           <div className="header-actions">
-            <motion.button
+            <motion.div
               className="portfolio-button"
               onClick={() => navigate("/portfolio")}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               📊 Portfolio
-            </motion.button>
-            <motion.button
-              className="portfolio-button"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
+            </motion.div>
+            <motion.div className="deposit-info">
+              <span>Deposited XRP in Contract: {depositedAmount} XRP</span>
               <DepositButton />
-            </motion.button>
-
-            <button
+            </motion.div>
+            <motion.button
               className="disconnect-button"
               onClick={handleDisconnectWallet}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               🔌 Disconnect Wallet
-            </button>
+            </motion.button>
           </div>
         </motion.header>
 
@@ -196,7 +159,7 @@ const Dashboard = () => {
       {selectedOpportunity && (
         <StakeModal
           opportunity={selectedOpportunity}
-          onClose={handleCloseModal}
+          onClose={() => setSelectedOpportunity(null)}
         />
       )}
 
@@ -207,9 +170,8 @@ const Dashboard = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 50 }}
-          transition={{ duration: 0.3 }}
         >
-          ✅ Wallet disconnected
+          Wallet disconnected successfully
         </motion.div>
       )}
     </motion.div>

@@ -1,5 +1,5 @@
 {
-  "name": "xrp-defi-aggregator",
+  "name": "xrp.fi",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -15,6 +15,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.20.1",
+    "styled-components": "^6.1.18",
     "three": "^0.177.0",
     "vanta": "^0.5.24"
   },
