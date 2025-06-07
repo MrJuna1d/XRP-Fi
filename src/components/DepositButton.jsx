@@ -78,7 +78,7 @@ const DepositButton = () => {
 
       <button
         onClick={handleDeposit}
-        className="px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded hover:scale-105 transition disabled:opacity-50"
+        className="px-8 py-3 bg-gradient-to-r from-[#00D4FF] to-[#0099CC] text-white font-bold text-lg rounded-xl shadow-lg hover:scale-105 transition duration-300 ease-in-out disabled:opacity-50"
         disabled={loading}
       >
         {loading ? "Processing..." : "Deposit XRP"}
