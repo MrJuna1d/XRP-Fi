@@ -17,14 +17,9 @@ const DepositButton = () => {
 
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
-      const contract = new ethers.Contract(
-        CONTRACT_ADDRESS,
-        XRP_CONTRACT_ABI,
-        provider
-      );
-      const depositBigInt = await contract.getDepositBalance(account);
-      const depositFormatted = ethers.formatEther(depositBigInt);
-      setUserDeposit(parseFloat(depositFormatted).toFixed(4));
+      const balanceBigInt = await provider.getBalance(account);
+      const balanceInEth = ethers.formatEther(balanceBigInt);
+      setXrpBalance(parseFloat(balanceInEth).toFixed(4)); // treat it as XRP
     } catch (error) {
       console.error("Failed to fetch deposited balance:", error);
     }
@@ -57,7 +52,7 @@ const DepositButton = () => {
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(
         CONTRACT_ADDRESS,
-        XRP_CONTRACT_ABI,
+        CONTRACT_ABI,
         signer
       );
 

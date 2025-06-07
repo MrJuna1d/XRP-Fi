@@ -129,7 +129,21 @@ const Dashboard = () => {
           transition={{ duration: 0.6 }}
         >
           <h1 className="dashboard-title">
-            XRP DeFi <span className="gradient-text">Dashboard</span>
+            <motion.span
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+            >
+              XRP DeFi
+            </motion.span>{' '}
+            <motion.span
+              className="gradient-text"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
+            >
+              Dashboard
+            </motion.span>
           </h1>
           <div className="header-actions">
             <motion.button
