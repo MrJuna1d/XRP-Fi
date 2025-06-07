@@ -1,22 +1,14 @@
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 const LoadingScreen = ({ onComplete }) => {
-  const [animationPhase, setAnimationPhase] = useState('initial');
-
   useEffect(() => {
-    const timer1 = setTimeout(() => setAnimationPhase('slideIn'), 100);
-    const timer2 = setTimeout(() => setAnimationPhase('formX'), 1200);
-    const timer3 = setTimeout(() => setAnimationPhase('glow'), 1700);
-    const timer4 = setTimeout(() => setAnimationPhase('zoom'), 2200);
-    const timer5 = setTimeout(() => onComplete(), 3500);
+    const timerComplete = setTimeout(() => {
+      onComplete();
+    }, 2500); // Original duration for simple animation
 
     return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      clearTimeout(timer3);
-      clearTimeout(timer4);
-      clearTimeout(timer5);
+      clearTimeout(timerComplete);
     };
   }, [onComplete]);
 
@@ -28,91 +20,58 @@ const LoadingScreen = ({ onComplete }) => {
       transition={{ duration: 0.5 }}
     >
       <div className="loading-container">
-        {/* First Line - slides from left and rotates to form top-left to bottom-right diagonal */}
-        <motion.div
-          className="line"
-          initial={{ 
-            x: -200, 
-            y: 0,
-            opacity: 0,
-            rotate: 0
-          }}
-          animate={{
-            x: animationPhase === 'initial' ? -200 : 0,
-            y: 0,
-            opacity: animationPhase === 'initial' ? 0 : 1,
-            rotate: animationPhase === 'formX' || animationPhase === 'glow' || animationPhase === 'zoom' ? 45 : 0,
-          }}
+        <motion.svg
+          width="100"
+          height="100"
+          viewBox="0 0 100 100"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
           transition={{
-            x: { duration: 1, ease: [0.25, 0.46, 0.45, 0.94] },
-            opacity: { duration: 0.3 },
-            rotate: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+            opacity: { duration: 0.5 },
+            scale: { duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] },
           }}
           style={{
             position: 'absolute',
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            transformOrigin: 'center',
           }}
-        />
-        
-        {/* Second Line - slides from right and rotates to form top-right to bottom-left diagonal */}
-        <motion.div
-          className="line"
-          initial={{ 
-            x: 200, 
-            y: 0,
-            opacity: 0,
-            rotate: 0
-          }}
-          animate={{
-            x: animationPhase === 'initial' ? 200 : 0,
-            y: 0,
-            opacity: animationPhase === 'initial' ? 0 : 1,
-            rotate: animationPhase === 'formX' || animationPhase === 'glow' || animationPhase === 'zoom' ? -45 : 0,
-          }}
-          transition={{
-            x: { duration: 1, ease: [0.25, 0.46, 0.45, 0.94] },
-            opacity: { duration: 0.3 },
-            rotate: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
-          }}
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            transformOrigin: 'center',
-          }}
-        />
-
-        {/* Glow Effect - appears when X is formed */}
-        <motion.div
-          className="x-glow"
-          initial={{ opacity: 0, scale: 1 }}
-          animate={{
-            opacity: animationPhase === 'glow' ? [0, 0.8, 0.6, 1, 0.7] : 0,
-            scale: animationPhase === 'zoom' ? 50 : 1,
-          }}
-          transition={{
-            opacity: { duration: 0.5, times: [0, 0.2, 0.4, 0.7, 1] },
-            scale: { duration: 1.3, delay: animationPhase === 'zoom' ? 0 : 1, ease: [0.25, 0.46, 0.45, 0.94] },
-          }}
-        />
-
-        {/* X Container for final zoom effect */}
-        <motion.div
-          className="x-container"
-          initial={{ scale: 1, opacity: 1 }}
-          animate={{
-            scale: animationPhase === 'zoom' ? 50 : 1,
-            opacity: animationPhase === 'zoom' ? 0 : 1,
-          }}
-          transition={{
-            scale: { duration: 1.3, ease: [0.25, 0.46, 0.45, 0.94] },
-            opacity: { duration: 0.5, delay: 0.8 },
-          }}
-        />
+        >
+          {/* Top-left to Bottom-right curved stroke of XRP logo (simplified for overall shape) */}
+          <path
+            d="M 10 20 C 25 5, 75 95, 90 80"
+            stroke="url(#gradient1)"
+            strokeWidth="12"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          {/* Bottom-left to Top-right curved stroke of XRP logo (simplified for overall shape) */}
+          <path
+            d="M 10 80 C 25 95, 75 5, 90 20"
+            stroke="url(#gradient2)"
+            strokeWidth="12"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <defs>
+            <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#ff9900" />
+              <stop offset="25%" stopColor="#ff3f81" />
+              <stop offset="50%" stopColor="#7f5fff" />
+              <stop offset="75%" stopColor="#00eaff" />
+              <stop offset="100%" stopColor="#00d4a9" />
+            </linearGradient>
+             <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#00d4a9" />
+              <stop offset="25%" stopColor="#00eaff" />
+              <stop offset="50%" stopColor="#7f5fff" />
+              <stop offset="75%" stopColor="#ff3f81" />
+              <stop offset="100%" stopColor="#ff9900" />
+            </linearGradient>
+          </defs>
+        </motion.svg>
       </div>
     </motion.div>
   );

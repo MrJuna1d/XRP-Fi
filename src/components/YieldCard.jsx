@@ -16,7 +16,7 @@ const YieldCard = ({ opportunity, delay = 0, onStakeClick }) => {
 
   return (
     <motion.div
-      className={`yield-card ${!opportunity.isFunctional ? 'mock-card' : ''}`}
+      className="yield-card"
       initial={{ y: 50, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, delay }}
@@ -32,7 +32,6 @@ const YieldCard = ({ opportunity, delay = 0, onStakeClick }) => {
           <div>
             <h3 className="protocol-name">
               {opportunity.protocol}
-              {!opportunity.isFunctional && <span className="demo-badge">DEMO</span>}
             </h3>
             <div className="protocol-chain">{opportunity.chain}</div>
           </div>
