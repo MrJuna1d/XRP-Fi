@@ -1,11 +1,12 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useWallet } from '../context/WalletContext';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const LandingPage = () => {
   const navigate = useNavigate();
   const { account, connectWallet, isConnecting } = useWallet();
+  const [error, setError] = useState('');
 
   // Auto-redirect if wallet is already connected
   useEffect(() => {
@@ -15,10 +16,16 @@ const LandingPage = () => {
   }, [account, navigate]);
 
   const handleConnectWallet = async () => {
-    const connectedAccount = await connectWallet();
-    if (connectedAccount) {
-      // Auto-redirect to dashboard after successful connection
-      navigate('/dashboard');
+    try {
+      setError(''); // Clear any previous errors
+      const connectedAccount = await connectWallet();
+      if (connectedAccount) {
+        // Auto-redirect to dashboard after successful connection
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      console.error('Failed to connect wallet:', err);
+      setError('Failed to connect wallet. Please try again.');
     }
   };
 
@@ -43,15 +50,18 @@ const LandingPage = () => {
           <p className="hero-subtitle">
             Maximize your yields across chains with intelligent XRP staking and cross-chain opportunities
           </p>
-          <motion.button
-            className="cta-button"
-            onClick={handleConnectWallet}
-            disabled={isConnecting}
-            whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(0, 212, 255, 0.3)' }}
-            whileTap={{ scale: 0.95 }}
-          >
-            {isConnecting ? 'Connecting...' : 'Connect Wallet'}
-          </motion.button>
+          <div className="wallet-connection">
+            <motion.button
+              className="cta-button"
+              onClick={handleConnectWallet}
+              disabled={isConnecting}
+              whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(0, 212, 255, 0.3)' }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+            </motion.button>
+            {error && <div className="error-message">{error}</div>}
+          </div>
         </motion.div>
 
         <motion.div

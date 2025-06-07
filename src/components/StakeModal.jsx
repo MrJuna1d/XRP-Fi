@@ -1,45 +1,25 @@
 // ✅ FINAL VERSION OF STAKE MODAL — ensures contract sends real value from deposit balance to bridge wallet
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useWallet } from "../context/WalletContext";
 import { ethers } from "ethers";
 import {
   XRP_CONTRACT_ADDRESS,
   XRP_CONTRACT_ABI,
 } from "../constants/XRPcontract";
+import { bridgeToEthereum } from "../services/bridgeService";
 
 const StakeModal = ({ opportunity, onClose }) => {
-  const { account } = useWallet();
-  const [depositedBalance, setDepositedBalance] = useState("0.00");
+  const { account, depositBalance, fetchDepositBalance } = useWallet();
   const [stakeAmount, setStakeAmount] = useState("");
   const [isStaking, setIsStaking] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-
-  const fetchDepositBalance = async () => {
-    if (!account || !window.ethereum) return;
-    try {
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const contract = new ethers.Contract(
-        XRP_CONTRACT_ADDRESS,
-        XRP_CONTRACT_ABI,
-        provider
-      );
-      const balanceBigInt = await contract.getDepositBalance(account);
-      const formatted = ethers.formatEther(balanceBigInt);
-      setDepositedBalance(parseFloat(formatted).toFixed(4));
-    } catch (err) {
-      console.error("Error fetching deposit balance:", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchDepositBalance();
-  }, [account]);
+  const [bridgeStatus, setBridgeStatus] = useState("");
 
   const handleStakeConfirm = async () => {
     const numericAmount = parseFloat(stakeAmount);
-    const numericBalance = parseFloat(depositedBalance);
+    const numericBalance = parseFloat(depositBalance);
 
     if (!numericAmount || numericAmount <= 0) return alert("Invalid amount");
     if (numericAmount > numericBalance)
@@ -47,6 +27,9 @@ const StakeModal = ({ opportunity, onClose }) => {
 
     try {
       setIsStaking(true);
+      setBridgeStatus("Initiating XRP bridge...");
+
+      // First, initiate the XRP side bridge
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(
@@ -55,13 +38,24 @@ const StakeModal = ({ opportunity, onClose }) => {
         signer
       );
 
-      const parsedAmount = ethers.parseEther(numericAmount.toString());
+      const parsedAmount = ethers.parseEther(stakeAmount);
 
       const tx = await contract.initiateBridge(parsedAmount);
+      setBridgeStatus("Waiting for XRP bridge confirmation...");
       await tx.wait();
 
+      // Update the deposit balance after successful bridge
       await fetchDepositBalance();
 
+      // Now trigger the Ethereum side bridge
+      setBridgeStatus("Initiating Ethereum bridge...");
+      const ethBridgeResult = await bridgeToEthereum(stakeAmount, account);
+
+      if (!ethBridgeResult.success) {
+        throw new Error(`Ethereum bridge failed: ${ethBridgeResult.error}`);
+      }
+
+      setBridgeStatus("Bridge completed successfully!");
       setShowSuccess(true);
       setTimeout(() => {
         setShowSuccess(false);
@@ -69,14 +63,15 @@ const StakeModal = ({ opportunity, onClose }) => {
       }, 2000);
     } catch (err) {
       console.error("Bridge initiation failed:", err);
-      alert("Bridge transaction failed. Check console for details.");
+      setBridgeStatus("");
+      alert(err.message || "Bridge transaction failed. Check console for details.");
     } finally {
       setIsStaking(false);
     }
   };
 
   const handleMaxClick = () => {
-    setStakeAmount(depositedBalance.toString());
+    setStakeAmount(depositBalance.toString());
   };
 
   return (
@@ -118,7 +113,7 @@ const StakeModal = ({ opportunity, onClose }) => {
               <div className="modal-balance">
                 <div className="balance-info">
                   <span className="balance-label">Deposited in Contract</span>
-                  <span className="balance-value">{depositedBalance} XRP</span>
+                  <span className="balance-value">{depositBalance} XRP</span>
                 </div>
               </div>
 
@@ -179,7 +174,8 @@ const StakeModal = ({ opportunity, onClose }) => {
               >
                 {isStaking ? (
                   <div className="loading-spinner">
-                    <div className="spinner"></div>Staking...
+                    <div className="spinner"></div>
+                    {bridgeStatus || "Processing..."}
                   </div>
                 ) : (
                   "Confirm Stake"

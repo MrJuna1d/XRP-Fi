@@ -1,33 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useWallet } from "../context/WalletContext";
-import { XRP_CONTRACT_ABI } from "../constants/XRPcontract";
+import { XRP_CONTRACT_ABI, XRP_CONTRACT_ADDRESS } from "../constants/XRPcontract";
 import { ethers } from "ethers";
 
-const CONTRACT_ADDRESS = "0x61389b858618dc82e961Eadfd5B33C83B9669E04";
-
 const DepositButton = () => {
-  const { account } = useWallet();
-  const [userDeposit, setUserDeposit] = useState("0.00");
+  const { account, depositBalance, fetchDepositBalance } = useWallet();
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-
-  // ✅ Fetch user's deposited balance from contract
-  const fetchDepositBalance = async () => {
-    if (!account || typeof window.ethereum === "undefined") return;
-
-    try {
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const balanceBigInt = await provider.getBalance(account);
-      const balanceInEth = ethers.formatEther(balanceBigInt);
-      setXrpBalance(parseFloat(balanceInEth).toFixed(4)); // treat it as XRP
-    } catch (error) {
-      console.error("Failed to fetch deposited balance:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchDepositBalance();
-  }, [account]);
 
   const handleDeposit = async () => {
     if (!window.ethereum || !account) {
@@ -36,36 +15,51 @@ const DepositButton = () => {
     }
 
     try {
-      const depositAmount = prompt(
-        "Enter amount of XRP to deposit (e.g., 0.01):"
-      );
-
-      if (!depositAmount || isNaN(depositAmount)) {
+      const depositAmount = prompt("Enter amount of XRP to deposit (e.g., 0.01):");
+      
+      if (!depositAmount || isNaN(depositAmount) || parseFloat(depositAmount) <= 0) {
         setMessage("❌ Invalid amount entered.");
         return;
       }
 
       setLoading(true);
-      setMessage("Depositing...");
+      setMessage("Waiting for MetaMask confirmation...");
 
+      // Get the signer and create contract instance
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(
-        CONTRACT_ADDRESS,
-        CONTRACT_ABI,
+        XRP_CONTRACT_ADDRESS,
+        XRP_CONTRACT_ABI,
         signer
       );
 
+      // Convert the amount to Wei (or the smallest unit)
+      const depositAmountWei = ethers.parseEther(depositAmount);
+
+      // Call the deposit function with the value parameter
       const tx = await contract.deposit({
-        value: ethers.parseEther(depositAmount),
+        value: depositAmountWei
       });
 
+      setMessage("Transaction submitted. Waiting for confirmation...");
+      
+      // Wait for transaction confirmation
       await tx.wait();
+      
       setMessage(`✅ Successfully deposited ${depositAmount} XRP.`);
-      fetchDepositBalance(); // refresh after deposit
+      
+      // Refresh the deposit balance
+      await fetchDepositBalance();
     } catch (error) {
       console.error("Deposit failed:", error);
-      setMessage("❌ Deposit failed. Check the console for details.");
+      if (error.code === 4001) {
+        setMessage("❌ Transaction rejected by user.");
+      } else if (error.code === 'INSUFFICIENT_FUNDS') {
+        setMessage("❌ Insufficient funds for deposit.");
+      } else {
+        setMessage("❌ Deposit failed. Check console for details.");
+      }
     } finally {
       setLoading(false);
     }
@@ -74,7 +68,7 @@ const DepositButton = () => {
   return (
     <div className="text-white space-y-3">
       <div>
-        <strong>Deposited XRP in Contract:</strong> {userDeposit} XRP
+        <strong>Deposited XRP in Contract:</strong> {depositBalance} XRP
       </div>
 
       <button
@@ -86,7 +80,9 @@ const DepositButton = () => {
       </button>
 
       {message && (
-        <div className="mt-2 text-sm text-white/80 italic">{message}</div>
+        <div className={`mt-2 text-sm italic ${message.includes('✅') ? 'text-green-400' : 'text-red-400'}`}>
+          {message}
+        </div>
       )}
     </div>
   );

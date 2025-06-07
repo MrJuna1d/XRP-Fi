@@ -1,4 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { ethers } from "ethers";
+import { XRP_CONTRACT_ADDRESS, XRP_CONTRACT_ABI } from "../constants/XRPcontract";
 
 const WalletContext = createContext();
 
@@ -14,6 +16,8 @@ export const WalletProvider = ({ children }) => {
   const [account, setAccount] = useState(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [balance, setBalance] = useState("0");
+  const [depositBalance, setDepositBalance] = useState("0.00");
+  const [chainId, setChainId] = useState(null);
 
   // Enhanced portfolio data with more realistic tracking
   const [portfolio, setPortfolio] = useState({
@@ -22,35 +26,77 @@ export const WalletProvider = ({ children }) => {
     stakedAssets: [],
   });
 
-  const connectWallet = async () => {
-    if (typeof window.ethereum !== "undefined") {
-      try {
-        setIsConnecting(true);
-        const accounts = await window.ethereum.request({
-          method: "eth_requestAccounts",
-        });
+  const fetchDepositBalance = async () => {
+    if (!account || typeof window.ethereum === "undefined") return;
 
-        if (accounts.length > 0) {
-          const connectedAccount = accounts[0];
-          setAccount(connectedAccount);
-          setBalance("2,847.65");
-
-          // Store in localStorage for persistence
-          localStorage.setItem("connectedWallet", connectedAccount);
-          localStorage.setItem("walletBalance", "2,847.65");
-
-          return connectedAccount; // Return the account for immediate use
-        }
-      } catch (error) {
-        console.error("Error connecting wallet:", error);
-        return null;
-      } finally {
-        setIsConnecting(false);
-      }
-    } else {
-      alert("MetaMask is not installed. Please install MetaMask to continue.");
-      setIsConnecting(false);
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const contract = new ethers.Contract(
+        XRP_CONTRACT_ADDRESS,
+        XRP_CONTRACT_ABI,
+        provider
+      );
+      const balanceBigInt = await contract.getDepositBalance(account);
+      const formatted = ethers.formatEther(balanceBigInt);
+      setDepositBalance(parseFloat(formatted).toFixed(4));
+      return formatted;
+    } catch (error) {
+      console.error("Failed to fetch deposit balance:", error);
       return null;
+    }
+  };
+
+  const connectWallet = async () => {
+    if (typeof window.ethereum === "undefined") {
+      alert("MetaMask is not installed. Please install MetaMask to continue.");
+      return null;
+    }
+
+    try {
+      setIsConnecting(true);
+      const accounts = await window.ethereum.request({
+        method: "eth_requestAccounts",
+      });
+
+      if (accounts.length > 0) {
+        const connectedAccount = accounts[0];
+        
+        // Get the current chain ID
+        const chainIdHex = await window.ethereum.request({
+          method: "eth_chainId",
+        });
+        const chainIdDecimal = parseInt(chainIdHex, 16);
+        setChainId(chainIdDecimal);
+
+        // Get the account balance
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const balanceBigInt = await provider.getBalance(connectedAccount);
+        const balanceInEth = ethers.formatEther(balanceBigInt);
+        const formattedBalance = parseFloat(balanceInEth).toFixed(4);
+
+        setAccount(connectedAccount);
+        setBalance(formattedBalance);
+
+        // Fetch initial deposit balance
+        await fetchDepositBalance();
+
+        // Store in localStorage for persistence
+        localStorage.setItem("connectedWallet", connectedAccount);
+        localStorage.setItem("walletBalance", formattedBalance);
+
+        return connectedAccount;
+      }
+    } catch (error) {
+      console.error("Error connecting wallet:", error);
+      if (error.code === 4001) {
+        // User rejected the connection request
+        alert("Please approve the connection request in MetaMask to continue.");
+      } else {
+        alert("Failed to connect wallet. Please try again.");
+      }
+      return null;
+    } finally {
+      setIsConnecting(false);
     }
   };
 
@@ -180,6 +226,7 @@ export const WalletProvider = ({ children }) => {
     if (savedAccount && savedBalance) {
       setAccount(savedAccount);
       setBalance(savedBalance);
+      fetchDepositBalance(); // Fetch deposit balance when wallet is reconnected
     }
 
     if (savedPortfolio) {
@@ -193,22 +240,27 @@ export const WalletProvider = ({ children }) => {
 
     // Listen for account changes
     if (typeof window.ethereum !== "undefined") {
-      const handleAccountsChanged = (accounts) => {
+      const handleAccountsChanged = async (accounts) => {
         if (accounts.length === 0) {
           disconnectWallet();
         } else if (accounts[0] !== account) {
           setAccount(accounts[0]);
           localStorage.setItem("connectedWallet", accounts[0]);
+          await fetchDepositBalance(); // Fetch deposit balance when account changes
         }
       };
 
+      const handleChainChanged = (chainId) => {
+        // Reload the page when chain changes as recommended by MetaMask
+        window.location.reload();
+      };
+
       window.ethereum.on("accountsChanged", handleAccountsChanged);
+      window.ethereum.on("chainChanged", handleChainChanged);
 
       return () => {
-        window.ethereum.removeListener(
-          "accountsChanged",
-          handleAccountsChanged
-        );
+        window.ethereum.removeListener("accountsChanged", handleAccountsChanged);
+        window.ethereum.removeListener("chainChanged", handleChainChanged);
       };
     }
   }, [account]);
@@ -216,6 +268,8 @@ export const WalletProvider = ({ children }) => {
   const value = {
     account,
     balance,
+    depositBalance,
+    chainId,
     portfolio,
     isConnecting,
     connectWallet,
@@ -223,6 +277,7 @@ export const WalletProvider = ({ children }) => {
     formatAddress,
     stakeAsset,
     withdrawAsset,
+    fetchDepositBalance, // Expose this function to components
   };
 
   return (
