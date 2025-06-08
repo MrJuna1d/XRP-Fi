@@ -108,7 +108,7 @@ const Portfolio = () => {
               </div>
               <div className="stat-item">
                 <div className="stat-label">Total Yield Earned</div>
-                <div className="stat-value gradient-text">{portfolio.totalYield} XRP</div>
+                <div className="stat-value">{portfolio.totalYield} XRP</div>
               </div>
             </div>
           </div>
@@ -180,7 +180,7 @@ const Portfolio = () => {
                       </div>
                       <div className="detail-row">
                         <span className="detail-label">Current Yield</span>
-                        <span className="detail-value gradient-text">+{asset.currentYield} XRP</span>
+                        <span className="detail-value">+{asset.currentYield} XRP</span>
                       </div>
                       <div className="detail-row">
                         <span className="detail-label">Stake Date</span>
