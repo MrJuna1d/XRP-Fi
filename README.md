@@ -17,7 +17,6 @@ GitHub Repository: [MrJuna1d/XRP-Fi](https://github.com/MrJuna1d/XRP-Fi)
 While XRP is a well-established blockchain with fast and cheap transactions, it lacks a robust ecosystem of DeFi protocols compared to the likes of Ethereum. This project aims to bridge that gap by allowing XRP holders to tap into DeFi opportunities — specifically yield generation — through a simulated cross-chain bridge.
 
 The system works in four phases:
-
 1. **Deposit on XRP side (XRP EVM Sidechain)** – User deposits testnet XRP into XRP.Fi.
 2. **Bridge Funds to Ethereum (Sepolia)** – The backend relayer listens to events and sends ETH to the Ethereum smart contract.
 3. **Auto-Supply to Start Earning Yield** – The Ethereum contract deposits the ETH directly into DeFi protocol.
@@ -27,26 +26,22 @@ The system works in four phases:
 
 ## 🛠️ Technical Description
 
-**Frontend:**
-
-- Built with **[Vite](https://vitejs.dev/)** + **[React](https://reactjs.org/)**
+**Frontend:**  
+- Built with **[Vite](https://vitejs.dev/)** + **[React](https://reactjs.org/)**   
 - User-friendly interface to bridge, supply, and track yield positions
 
-**Backend / Smart Contracts:**
+**Backend / Smart Contracts:**  
+- Written in **Solidity**  
+- XRP-side contract (`XrpFiBridge`) handles deposits, bridge tracking, and withdrawals  
+- Ethereum-side contract (`EthereumBridgeReceiver`) tracks positions, supplies to Aave, and allows for withdrawal  
 
-- Written in **Solidity**
-- XRP-side contract (`XrpFiBridge`) handles deposits, bridge tracking, and withdrawals
-- Ethereum-side contract (`EthereumBridgeReceiver`) tracks positions, supplies to Aave, and allows for withdrawal
-
-**Integration Layer:**
-
-- Powered by **[ethers.js](https://docs.ethers.org/)** for interacting with contracts
+**Integration Layer:**  
+- Powered by **[ethers.js](https://docs.ethers.org/)** for interacting with contracts  
 - A **relayer** is used to simulate cross-chain fund movement by monitoring events and triggering corresponding actions
 
-**XRP EVM Sidechain Leverage:**
-
-- Deployed the XRP-side smart contract on **XRP EVM Sidechain** to simulate transactions
-- Interacts with a dedicated `CROSSCHAIN_WALLET` address to simulate value bridging
+**XRP EVM Sidechain Leverage:**  
+- Deployed the XRP-side smart contract on **XRP EVM Sidechain** to simulate transactions  
+- Interacts with a dedicated `CROSSCHAIN_WALLET` address to simulate value bridging  
 - Ensures compatibility with EVM standards for future migration to XRPL EVM mainnet
 
 ---
@@ -71,18 +66,17 @@ The system works in four phases:
 - **ETH Smart Contract Deployments**  
   [View on Sepolia Etherscan](https://sepolia.etherscan.io/address/0xb0c09e33f395122b7788be5c132d5cfdbf7a3e8f)
 
+
 ---
 
 ## 📹 Video Demo
 
-📺 _[YouTube Demo Link Here]_
+📺 https://youtu.be/GcjEg-4FuKk
 
 ---
 
 ## 🖼 Screenshot of UI
-
-![UI Screenshot](./screenshot.png)  
-_Example: bridging from XRP to Ethereum and supplying ETH to Aave._
+https://drive.google.com/drive/folders/1d6Sd2EGbb7Jc1r22i0kIJmXyyDfHNKV-?usp=sharing
 
 ---
 
@@ -92,3 +86,4 @@ _Example: bridging from XRP to Ethereum and supplying ETH to Aave._
 - Add reward tracking and APY comparison
 - Support for real XRP EVM sidechain deployments
 - Add stablecoin and NFT bridging simulation
+
