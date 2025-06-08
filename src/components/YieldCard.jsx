@@ -1,20 +1,7 @@
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 
 const YieldCard = ({ opportunity, delay, onStakeClick }) => {
   const { protocol, chain, apy, tvl, risk, icon, isFunctional } = opportunity;
-
-  const getRiskColor = (risk) => {
-    switch (risk) {
-      case "LOW":
-        return "LOW";
-      case "MEDIUM":
-        return "MEDIUM";
-      case "HIGH":
-        return "HIGH";
-      default:
-        return "MEDIUM";
-    }
-  };
 
   return (
     <motion.div
@@ -51,7 +38,7 @@ const YieldCard = ({ opportunity, delay, onStakeClick }) => {
         whileHover={{ y: -2 }}
         whileTap={{ scale: 0.98 }}
       >
-        {isFunctional ? "Stake XRP" : "View Demo"}
+        {isFunctional ? "Create Position" : "View Demo"}
       </motion.button>
     </motion.div>
   );

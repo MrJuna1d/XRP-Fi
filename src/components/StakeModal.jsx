@@ -16,6 +16,7 @@ const StakeModal = ({ opportunity, onClose }) => {
   const [isStaking, setIsStaking] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [bridgeStatus, setBridgeStatus] = useState("");
+  const [bridgeTxHashes, setBridgeTxHashes] = useState(null);
 
   const handleStakeConfirm = async () => {
     const numericAmount = parseFloat(stakeAmount);
@@ -42,7 +43,7 @@ const StakeModal = ({ opportunity, onClose }) => {
 
       const tx = await contract.initiateBridge(parsedAmount);
       setBridgeStatus("Waiting for XRP bridge confirmation...");
-      await tx.wait();
+      const xrpReceipt = await tx.wait();
 
       // Update the deposit balance after successful bridge
       await fetchDepositBalance();
@@ -55,16 +56,21 @@ const StakeModal = ({ opportunity, onClose }) => {
         throw new Error(`Ethereum bridge failed: ${ethBridgeResult.error}`);
       }
 
+      setBridgeTxHashes({
+        xrpHash: xrpReceipt.hash,
+        ethHash: ethBridgeResult.txHash,
+        from: account,
+        to: "0x61389b858618dc82e961Eadfd5B33C83B9669E04",
+      });
+
       setBridgeStatus("Bridge completed successfully!");
       setShowSuccess(true);
-      setTimeout(() => {
-        setShowSuccess(false);
-        onClose();
-      }, 2000);
     } catch (err) {
       console.error("Bridge initiation failed:", err);
       setBridgeStatus("");
-      alert(err.message || "Bridge transaction failed. Check console for details.");
+      alert(
+        err.message || "Bridge transaction failed. Check console for details."
+      );
     } finally {
       setIsStaking(false);
     }
@@ -184,52 +190,57 @@ const StakeModal = ({ opportunity, onClose }) => {
             </>
           ) : (
             <motion.div
-              className="success-animation"
+              className="success-animation p-6 rounded-xl bg-green-900/20 text-white space-y-4"
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: "spring", damping: 15, stiffness: 300 }}
             >
-              <motion.div
-                className="success-checkmark"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.2 }}
-              >
-                <motion.div
-                  className="checkmark-circle"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <motion.div
-                    className="checkmark-icon"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ delay: 0.3, duration: 0.5 }}
+              <h3 className="text-xl font-semibold text-green-300">
+                ✅ Stake Complete
+              </h3>
+
+              <div className="space-y-2 text-sm">
+                <div>
+                  <strong>XRP Bridge Tx:</strong>{" "}
+                  <a
+                    href={`https://explorer.testnet.xrplevm.org/tx/${bridgeTxHashes?.xrpHash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400 underline"
                   >
-                    ✓
-                  </motion.div>
-                </motion.div>
-              </motion.div>
-              <motion.div
-                className="success-text"
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.5, duration: 0.4 }}
+                    {bridgeTxHashes?.xrpHash?.slice(0, 8)}...
+                    {bridgeTxHashes?.xrpHash?.slice(-6)}
+                  </a>
+                </div>
+
+                <div>
+                  <strong>ETH Aave Tx:</strong>{" "}
+                  <a
+                    href={`https://sepolia.etherscan.io/tx/${bridgeTxHashes?.ethHash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400 underline"
+                  >
+                    {bridgeTxHashes?.ethHash?.slice(0, 8)}...
+                    {bridgeTxHashes?.ethHash?.slice(-6)}
+                  </a>
+                </div>
+
+                <div className="text-gray-400 text-xs">
+                  From: {bridgeTxHashes?.from}
+                  <br />
+                  To: {bridgeTxHashes?.to}
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  setShowSuccess(false);
+                  onClose();
+                }}
+                className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded mt-4 text-white"
               >
-                <h3>Staked Successfully!</h3>
-                <p>
-                  {stakeAmount} XRP staked in {opportunity.protocol}
-                </p>
-              </motion.div>
-              <motion.div
-                className="floating-xrp"
-                initial={{ y: 0, opacity: 1 }}
-                animate={{ y: -50, opacity: 0 }}
-                transition={{ delay: 0.8, duration: 1.2 }}
-              >
-                💰
-              </motion.div>
+                Continue
+              </button>
             </motion.div>
           )}
         </motion.div>

@@ -11,7 +11,6 @@ const Dashboard = () => {
   const { account, disconnectWallet } = useWallet();
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
   const [showDisconnectToast, setShowDisconnectToast] = useState(false);
-  const [depositedAmount, setDepositedAmount] = useState("0.0760"); // Mock deposited amount
 
   // Mock yield opportunities data
   const yieldOpportunities = [
@@ -33,7 +32,7 @@ const Dashboard = () => {
       tvl: "$1.8B",
       risk: "MEDIUM",
       icon: "🌊",
-      isFunctional: false,
+      isFunctional: true,
     },
     {
       id: 3,
@@ -43,7 +42,7 @@ const Dashboard = () => {
       tvl: "$950M",
       risk: "MEDIUM",
       icon: "🧙‍♂️",
-      isFunctional: false,
+      isFunctional: true,
     },
     {
       id: 4,
@@ -53,7 +52,7 @@ const Dashboard = () => {
       tvl: "$1.2B",
       risk: "LOW",
       icon: "🔺",
-      isFunctional: false,
+      isFunctional: true,
     },
     {
       id: 5,
@@ -63,7 +62,7 @@ const Dashboard = () => {
       tvl: "$650M",
       risk: "MEDIUM",
       icon: "⚖️",
-      isFunctional: false,
+      isFunctional: true,
     },
   ];
 
@@ -120,7 +119,7 @@ const Dashboard = () => {
               📊 Portfolio
             </motion.div>
             <motion.div className="deposit-info">
-              <span>Deposited XRP in Contract: {depositedAmount} XRP</span>
+              <span>Deposited XRP in Contract: </span>
               <DepositButton />
             </motion.div>
             <motion.button
